@@ -3,8 +3,8 @@ const ctx = canvas.getContext('2d');
 const ballRadius = 10;
 let x = canvas.width / 2;
 let y = canvas.height - 30;
-let dx = 2;
-let dy = -2;
+let dx = 5;
+let dy = -5;
 const paddleHeight = 10;
 const paddleWidth = 75;
 let paddleX = (canvas.width - paddleWidth) / 2;
@@ -19,6 +19,7 @@ const brickOffsetTop = 30;
 const brickOffsetLeft = 30;
 let score = 0;
 let lives = 3;
+const color = getRandomColor();
 
 const bricks = [];
 for (let c = 0; c < brickColumnCount; c += 1) {
@@ -75,9 +76,10 @@ function collisionDetection() {
 }
 
 function drawBall() {
+  const fullCircle = Math.PI * 2;
   ctx.beginPath();
-  ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-  ctx.fillStyle = '#0095DD';
+  ctx.arc(x, y, ballRadius, 0, fullCircle);
+  ctx.fillStyle = color;
   ctx.fill();
   ctx.closePath();
 }
@@ -108,12 +110,12 @@ function drawBricks() {
 function drawScore() {
   ctx.font = '16px Arial';
   ctx.fillStyle = '#0095DD';
-  ctx.fillText(`Score:${score}, 8, 20`);
+  ctx.fillText(`Score: ${score}`, 8, 20);
 }
 function drawLives() {
   ctx.font = '16px Arial';
   ctx.fillStyle = '#0095DD';
-  ctx.fillText(`Lives: lives, ${canvas.width} - 65, 20`);
+  ctx.fillText(`Lives:  ${lives}`, canvas.width - 65, 20);
 }
 
 function draw() {
@@ -157,6 +159,14 @@ function draw() {
   x += dx;
   y += dy;
   requestAnimationFrame(draw);
+}
+function getRandomColor() {
+  const letters = 'ABCDE'.split('');
+  let colors = '#';
+  for (let i = 0; i < 3; i += 1) {
+    colors += letters[Math.floor(Math.random() * letters.length)];
+  }
+  return colors;
 }
 document.addEventListener('keydown', keyDownHandler, false);
 document.addEventListener('keyup', keyUpHandler, false);
