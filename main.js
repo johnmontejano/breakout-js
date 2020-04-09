@@ -1,13 +1,15 @@
 const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
+const canvasWidth = canvas.width;
+const canvasHeight = canvas.height;
 const ballRadius = 10;
-let x = canvas.width / 2;
-let y = canvas.height - 30;
-let dx = 5;
-let dy = -5;
+let x = canvasWidth / 2;
+let y = canvasHeight - 30;
+let dx = 3;
+let dy = -3;
 const paddleHeight = 10;
 const paddleWidth = 75;
-let paddleX = (canvas.width - paddleWidth) / 2;
+let paddleX = (canvasWidth - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
 const brickRowCount = 5;
@@ -20,8 +22,9 @@ const brickOffsetLeft = 30;
 let score = 0;
 let lives = 3;
 const color = getRandomColor();
-
+const arialFont = '16px Arial';
 const bricks = [];
+
 for (let c = 0; c < brickColumnCount; c += 1) {
   bricks[c] = [];
   for (let r = 0; r < brickRowCount; r += 1) {
@@ -47,11 +50,12 @@ function keyUpHandler(e) {
 
 function mouseMoveHandler(e) {
   const relativeX = e.clientX - canvas.offsetLeft;
-  if (relativeX > 0 && relativeX < canvas.width) {
+  if (relativeX > 0 && relativeX < canvasWidth) {
     paddleX = relativeX - paddleWidth / 2;
   }
 }
 function collisionDetection() {
+  const congrats = 'YOU WIN, CONGRATS!';
   for (let c = 0; c < brickColumnCount; c += 1) {
     for (let r = 0; r < brickRowCount; r += 1) {
       const b = bricks[c][r];
@@ -66,8 +70,12 @@ function collisionDetection() {
           b.status = 0;
           score += 1;
           if (score === brickRowCount * brickColumnCount) {
-            alert('YOU WIN, CONGRATS!');
+            alert(congrats);
             document.location.reload();
+          }
+          if (score >= 5) {
+            dy += -2;
+            dx += 2;
           }
         }
       }
@@ -85,7 +93,7 @@ function drawBall() {
 }
 function drawPaddle() {
   ctx.beginPath();
-  ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+  ctx.rect(paddleX, canvasHeight - paddleHeight, paddleWidth, paddleHeight);
   ctx.fillStyle = '#0095DD';
   ctx.fill();
   ctx.closePath();
@@ -108,18 +116,22 @@ function drawBricks() {
   }
 }
 function drawScore() {
-  ctx.font = '16px Arial';
+  ctx.font = arialFont;
   ctx.fillStyle = '#0095DD';
   ctx.fillText(`Score: ${score}`, 8, 20);
 }
 function drawLives() {
-  ctx.font = '16px Arial';
+  ctx.font = arialFont;
   ctx.fillStyle = '#0095DD';
-  ctx.fillText(`Lives:  ${lives}`, canvas.width - 65, 20);
+  ctx.fillText(`Lives:  ${lives}`, canvasWidth - 65, 20);
 }
-
+function moveBall() {
+  x += dx;
+  y += dy;
+}
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  moveBall();
   drawBricks();
   drawBall();
   drawPaddle();
@@ -127,37 +139,51 @@ function draw() {
   drawLives();
   collisionDetection();
 
+  // Bounce the ball off the left and right of the canvas
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
     dx = -dx;
   }
+
+  // Bounce the ball off the top, paddle, or hit the bottom of the canvas
   if (y + dy < ballRadius) {
+    // hit the top
     dy = -dy;
   } else if (y + dy > canvas.height - ballRadius) {
+    // hit the bottom
     if (x > paddleX && x < paddleX + paddleWidth) {
+      // Hit the paddle
       dy = -dy;
     } else {
+      // Lose a life
       lives -= 1;
       if (!lives) {
-        alert('GAME OVER');
+        // Game Over
+        // eslint-disable-next-line no-alert
+        alert('GAME OVER'); // * Could be good as a constant
+        x = 200;
+        y = 200;
         document.location.reload();
       } else {
+        // Start the over you hit the bottom
+        // ** Set the position of ball and paddle
+        // ** And set the speed and direction of the ball
         x = canvas.width / 2;
         y = canvas.height - 30;
-        dx = 3;
-        dy = -3;
+        dx = 2;
+        dy = -2;
         paddleX = (canvas.width - paddleWidth) / 2;
       }
     }
   }
-
+  // Check for arrow keys
+  // *** Better as a function
   if (rightPressed && paddleX < canvas.width - paddleWidth) {
     paddleX += 7;
   } else if (leftPressed && paddleX > 0) {
     paddleX -= 7;
   }
 
-  x += dx;
-  y += dy;
+  // Draw the screen again
   requestAnimationFrame(draw);
 }
 function getRandomColor() {
